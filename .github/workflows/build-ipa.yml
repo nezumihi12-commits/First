@@ -24,8 +24,8 @@ jobs:
       - name: Build unsigned iPhone app
         run: |
           xcodebuild \
-            -project MyFirstiOSApp.xcodeproj \
-            -scheme MyFirstiOSApp \
+            -project UltraDimCamera.xcodeproj \
+            -scheme UltraDimCamera \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
@@ -36,7 +36,7 @@ jobs:
       - name: Package SideStore-compatible IPA
         run: |
           mkdir -p Payload
-          cp -R build/Build/Products/Release-iphoneos/MyFirstiOSApp.app Payload/
+          cp -R build/Build/Products/Release-iphoneos/UltraDimCamera.app Payload/
           zip -qry UltraDimCamera.ipa Payload
 
       - name: Upload IPA

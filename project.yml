@@ -1,8 +1,8 @@
-name: MyFirstiOSApp
+name: UltraDimCamera
 options:
   bundleIdPrefix: com.nezumihi12commits
 targets:
-  MyFirstiOSApp:
+  UltraDimCamera:
     type: application
     platform: iOS
     deploymentTarget: "16.0"
@@ -11,14 +11,15 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nezumihi12commits.ultradimcamera
-        PRODUCT_NAME: MyFirstiOSApp
-        INFOPLIST_KEY_CFBundleDisplayName: "微光カメラ"
+        PRODUCT_NAME: UltraDimCamera
+        INFOPLIST_KEY_CFBundleName: UltraDimCamera
+        INFOPLIST_KEY_CFBundleDisplayName: UltraDimCamera
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_NSCameraUsageDescription: "カメラの映像を表示し、動画を撮影するために使用します。"
         INFOPLIST_KEY_NSMicrophoneUsageDescription: "動画と一緒に音声を録音するために使用します。"
         INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "撮影した動画を写真アプリに保存するために使用します。"
-        MARKETING_VERSION: 1.0
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.1
+        CURRENT_PROJECT_VERSION: 2
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGNING_ALLOWED: NO
