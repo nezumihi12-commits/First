@@ -1,13 +1,15 @@
-name: Build IPA
+name: Build Ultra Dim Camera IPA
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/ultradim-camera" ]
 
 jobs:
   build:
     runs-on: macos-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -19,7 +21,7 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build unsigned app
+      - name: Build unsigned iPhone app
         run: |
           xcodebuild \
             -project MyFirstiOSApp.xcodeproj \
@@ -31,14 +33,15 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build
 
-      - name: Package IPA
+      - name: Package SideStore-compatible IPA
         run: |
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/MyFirstiOSApp.app Payload/
-          zip -r MyFirstiOSApp.ipa Payload
+          zip -qry UltraDimCamera.ipa Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: MyFirstiOSApp-IPA
-          path: MyFirstiOSApp.ipa
+          name: UltraDimCamera-IPA
+          path: UltraDimCamera.ipa
+          if-no-files-found: error
