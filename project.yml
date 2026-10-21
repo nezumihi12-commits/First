@@ -18,8 +18,8 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: "カメラの映像を表示し、動画を撮影するために使用します。"
         INFOPLIST_KEY_NSMicrophoneUsageDescription: "動画と一緒に音声を録音するために使用します。"
         INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "撮影した動画を写真アプリに保存するために使用します。"
-        MARKETING_VERSION: 1.1
-        CURRENT_PROJECT_VERSION: 2
+        MARKETING_VERSION: 1.2
+        CURRENT_PROJECT_VERSION: 3
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGNING_ALLOWED: NO

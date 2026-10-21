@@ -2,7 +2,7 @@
 
 iPhoneで背面カメラの映像を見ながら背面LEDを微調光して、操作音を加えず動画・音声を録画するSwiftUIアプリ。
 
-## 主な機能
+## 主な機能\n- 画面全体を使うライブプレビューと、スクロール不要のカメラ風操作画面（ライトON/OFF、光量、録画を1画面に集約）
 - 背面カメラプレビュー
 - トーチレベルを0.001〜1.0で指定する対数スライダー。実際の光量はハードウェア制限あり
 - AVFoundation の `AVCaptureVideoDataOutput` / `AVCaptureAudioDataOutput` と `AVAssetWriter` による録画（720p設定）

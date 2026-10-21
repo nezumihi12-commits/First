@@ -1,99 +1,49 @@
 import SwiftUI
 
+/// A single-screen, camera-style layout. The preview fills the display, and
+/// essential controls float above it instead of requiring scrolling.
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var camera = CameraController()
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 18) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("微光カメラ")
-                        .font(.largeTitle.bold())
-                    Text("最小のライトで、動画を撮る")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+        GeometryReader { geometry in
+            ZStack {
+                Color.black
+
+                CameraPreview(session: camera.session)
+                    .ignoresSafeArea()
+                    .accessibilityHidden(true)
+
+                // Keep small labels readable without hiding the live preview.
+                LinearGradient(
+                    colors: [
+                        .black.opacity(0.42),
+                        .clear,
+                        .clear,
+                        .black.opacity(0.58)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+
+                VStack(spacing: 0) {
+                    topBar
+
+                    Spacer(minLength: 12)
+
+                    bottomControls(compact: geometry.size.height < 620)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                ZStack(alignment: .topLeading) {
-                    CameraPreview(session: camera.session)
-                        .aspectRatio(3.0 / 4.0, contentMode: .fit)
-                        .background(Color.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-
-                    if camera.isRecording {
-                        Label("REC", systemImage: "record.circle.fill")
-                            .font(.headline)
-                            .padding(10)
-                            .background(.red, in: RoundedRectangle(cornerRadius: 10))
-                            .padding(12)
-                    }
-                }
-
-                VStack(spacing: 14) {
-                    Toggle(isOn: $camera.torchEnabled) {
-                        Label("ライト", systemImage: "flashlight.on.fill")
-                    }
-                    .onChange(of: camera.torchEnabled) { _ in camera.applyTorchSetting() }
-
-                    HStack {
-                        Text("指定光量")
-                        Spacer()
-                        Text(String(format: "%.2f%%", Double(camera.requestedLevel) * 100))
-                            .monospacedDigit()
-                            .fontWeight(.semibold)
-                    }
-                    Slider(value: $camera.brightnessPosition, in: 0...1) { _ in
-                        camera.applyTorchSetting()
-                    }
-                    .onChange(of: camera.brightnessPosition) { _ in
-                        camera.applyTorchSetting()
-                    }
-                    HStack {
-                        Text("0.1%")
-                        Spacer()
-                        Text("100%")
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                    Button {
-                        camera.brightnessPosition = 0
-                        camera.applyTorchSetting()
-                    } label: {
-                        Label("最小指定値に戻す", systemImage: "arrow.down.to.line")
-                    }
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .padding()
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
-
-                Button(action: camera.toggleRecording) {
-                    Label(camera.isRecording ? "録画を停止" : "動画を録画",
-                          systemImage: camera.isRecording ? "stop.fill" : "record.circle")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(camera.isRecording ? .red : .accentColor)
-                .disabled(!camera.isReady)
-
-                Text(camera.status)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-
-                Text("※ 指定光量はAPIへの入力値。LEDの実際の明るさではありません。端末の最小光量より弱くはできません。画面を離れると消灯し、録画も停止します。")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .padding(.bottom, 8)
             }
-            .padding()
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color.black)
+        .preferredColorScheme(.dark)
         .onAppear { camera.start() }
         .onDisappear { camera.stop() }
         .onChange(of: scenePhase) { phase in
@@ -103,5 +53,122 @@ struct ContentView: View {
                 camera.stop()
             }
         }
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 10) {
+            Button {
+                camera.torchEnabled.toggle()
+                camera.applyTorchSetting()
+            } label: {
+                Image(systemName: camera.torchEnabled ? "bolt.fill" : "bolt.slash.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(camera.torchEnabled ? .yellow : .white)
+                    .frame(width: 48, height: 48)
+                    .background(Color.black.opacity(0.65), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(camera.torchEnabled ? "ライトをオフ" : "ライトをオン")
+
+            Spacer(minLength: 4)
+
+            Text("UltraDimCamera")
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .foregroundColor(.white)
+
+            Spacer(minLength: 4)
+
+            Group {
+                if camera.isRecording {
+                    Label("REC", systemImage: "circle.fill")
+                        .font(.caption.bold())
+                        .foregroundColor(.red)
+                } else {
+                    Text("VIDEO")
+                        .font(.caption.bold())
+                        .foregroundColor(.white.opacity(0.85))
+                }
+            }
+            .frame(width: 54)
+            .padding(.vertical, 12)
+            .background(Color.black.opacity(0.65), in: Capsule())
+        }
+    }
+
+    private func bottomControls(compact: Bool) -> some View {
+        VStack(spacing: compact ? 8 : 12) {
+            HStack(spacing: 8) {
+                Label("ライトの強さ", systemImage: "sun.min.fill")
+                    .font(.subheadline.weight(.medium))
+
+                Spacer()
+
+                // Requested API level, not a measured LED output percentage.
+                Text(String(format: "%.2f%%", Double(camera.requestedLevel) * 100))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+            }
+
+            Slider(value: $camera.brightnessPosition, in: 0...1)
+                .tint(.yellow)
+                .accessibilityLabel("ライトの強さ")
+                .onChange(of: camera.brightnessPosition) { _ in
+                    camera.applyTorchSetting()
+                }
+
+            HStack {
+                Text("0.1%")
+                Spacer()
+                Button("最小に戻す") {
+                    camera.brightnessPosition = 0
+                    camera.applyTorchSetting()
+                }
+                .font(.caption.weight(.medium))
+                .buttonStyle(.bordered)
+                .tint(.white)
+                Spacer()
+                Text("100%")
+            }
+            .font(.caption)
+            .foregroundColor(.white.opacity(0.85))
+
+            Button(action: camera.toggleRecording) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.white, lineWidth: 4)
+                        .frame(width: compact ? 65 : 74, height: compact ? 65 : 74)
+
+                    if camera.isRecording {
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(Color.red)
+                            .frame(width: 27, height: 27)
+                    } else {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: compact ? 51 : 59, height: compact ? 51 : 59)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!camera.isReady)
+            .opacity(camera.isReady ? 1 : 0.45)
+            .accessibilityLabel(camera.isRecording ? "録画を停止" : "録画を開始")
+            .padding(.top, compact ? 2 : 4)
+
+            Text(camera.status)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.88))
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, minHeight: compact ? 16 : 26)
+        }
+        .foregroundColor(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, compact ? 10 : 14)
+        .background(Color.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 22))
     }
 }
